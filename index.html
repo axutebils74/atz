@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>apk2zip</title>
+    <script>
+        onerror = function (e){
+            div.innerHTML = e
+        }
+        onunhandledrejection = function(e){
+            div.innerHTML = e.reason
+        }
+    </script>
+    <script src="jszip.min.js"></script>
+</head>
+<body>
+    <h1 style="background-color: tan;">apk文件转zip</h1>
+    <input type="file" id="f">
+    <details>
+        <summary>其他</summary>
+        <input type="checkbox" id="a1"> 删除注释 <br>
+        <input type="checkbox" id="a2"> 删除文件长度大于<span id="a4">226</span>的
+        <input type="number" id="a3" value="226" oninput="a4.innerHTML=a3.value">
+    </details>
+    <div id="div"></div>
+    <script>
+async function readBlob(blob){
+    if(blob.size < 2**31){
+        return  new Uint8Array(await blob.arrayBuffer());
+    }else{
+        var k = new Uint8Array(blob.size);
+        for(var i = 0;i < blob.size;i+=1e9){
+            k.set(new Uint8Array(await blob.slice(i,i+1e9).arrayBuffer()),i);
+        }
+        return k;
+    }
+}
+f.oninput = async function(){
+    if(!f.files[0]) return;
+    var data = await readBlob(f.files[0]);
+    var zip = new JSZip();
+    var d = await zip.loadAsync(data);
+    if(a1.checked && d.comment){
+        delete d.comment
+    }
+    if(a2.checked){
+        for(var i in zip.files){
+            if(new TextEncoder().encode(i).length > a3.value){
+                n.remove(i);
+            }
+        }
+    }
+    zip.generateAsync({ type: "blob" }).then(function (blob) {
+            let a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'compress.zip'
+            a.click();
+    });
+}
+    </script>
+</body>
+</html>
