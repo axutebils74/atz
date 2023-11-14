@@ -47,15 +47,16 @@ f.oninput = async function(){
     if(a2.checked){
         for(var i in zip.files){
             if(new TextEncoder().encode(i).length > a3.value){
-                n.remove(i);
+                zip.remove(i);
             }
         }
     }
     zip.generateAsync({ type: "blob" }).then(function (blob) {
             let a = document.createElement('a');
             a.href = URL.createObjectURL(blob);
-            a.download = 'compress.zip'
+            a.download = 'export.zip'
             a.click();
+            f.value=''
     });
 }
     </script>
